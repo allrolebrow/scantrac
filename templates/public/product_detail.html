@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ product.name }} — Detail Produk</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root{--bg:#0A0A0F;--bg2:#111118;--surface:#16161F;--border:rgba(255,255,255,.07);
+      --accent:#00E5A0;--text:#F0F0F5;--muted:#7A7A90;--card:#13131C}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{background:var(--bg);color:var(--text);font-family:"DM Sans",sans-serif;min-height:100vh;padding-bottom:60px}
+    /* top gradient band */
+    .hero-band{background:linear-gradient(135deg,rgba(0,229,160,.12),rgba(123,97,255,.08));
+      padding:40px 24px 80px;text-align:center;position:relative;overflow:hidden}
+    .hero-band::after{content:'';position:absolute;inset:0;
+      background:radial-gradient(ellipse 60% 80% at 50% 0%,rgba(0,229,160,.1),transparent);pointer-events:none}
+    .brand{font-size:12px;font-weight:600;letter-spacing:2px;text-transform:uppercase;
+      color:var(--accent);margin-bottom:16px}
+    .product-name{font-family:"Syne",sans-serif;font-size:clamp(26px,6vw,40px);
+      font-weight:800;letter-spacing:-1px;line-height:1.1;margin-bottom:12px}
+    .category-badge{display:inline-flex;align-items:center;gap:6px;
+      background:rgba(0,229,160,.1);border:1px solid rgba(0,229,160,.2);
+      border-radius:100px;padding:5px 14px;font-size:12px;font-weight:600;color:var(--accent);
+      letter-spacing:.5px;text-transform:uppercase}
+    .card-float{background:var(--card);border:1px solid var(--border);border-radius:24px;
+      margin:0 16px;margin-top:-40px;position:relative;overflow:hidden}
+    .card-float::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;
+      background:linear-gradient(90deg,var(--accent),transparent)}
+    .section{padding:24px}
+    .section+.section{border-top:1px solid var(--border)}
+    .sec-title{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;
+      color:var(--muted);margin-bottom:16px}
+    .row{display:flex;justify-content:space-between;align-items:center;
+      padding:10px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+    .row:last-child{border-bottom:none}
+    .row-label{font-size:14px;color:var(--muted)}
+    .row-val{font-size:14px;font-weight:500;color:var(--text);text-align:right;max-width:58%}
+    .desc-text{font-size:14px;color:var(--muted);line-height:1.8}
+    .scan-count{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);
+      justify-content:center;padding:20px;border-top:1px solid var(--border)}
+    .scan-num{font-family:"Syne",sans-serif;font-size:20px;font-weight:800;color:var(--accent)}
+    .verified-banner{background:rgba(0,229,160,.06);border:1px solid rgba(0,229,160,.15);
+      border-radius:16px;margin:0 16px 16px;padding:14px 18px;
+      display:flex;align-items:center;gap:12px}
+    .footer-brand{text-align:center;padding:40px 24px 0;font-size:12px;color:var(--muted)}
+    .footer-brand span{font-family:"Syne",sans-serif;font-weight:800;color:var(--text)}
+    .footer-brand a{color:var(--accent)}
+  </style>
+</head>
+<body>
+
+<!-- Hero band -->
+<div class="hero-band">
+  <div class="brand">{{ product.owner.name }}</div>
+  <h1 class="product-name">{{ product.name }}</h1>
+  {% if product.category %}
+  <span class="category-badge">✦ {{ product.category }}</span>
+  {% endif %}
+</div>
+
+<!-- Verified banner -->
+<div class="verified-banner">
+  <div style="width:36px;height:36px;background:rgba(0,229,160,.15);border-radius:50%;
+    display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">✓</div>
+  <div>
+    <div style="font-size:13px;font-weight:600;color:var(--accent)">Produk Terverifikasi</div>
+    <div style="font-size:12px;color:var(--muted)">QR Code resmi dari ScanTrac — {{ batch.batch_code }}</div>
+  </div>
+</div>
+
+<!-- Main card -->
+<div class="card-float">
+
+  <!-- Dates -->
+  {% if batch.production_date or batch.expiry_date %}
+  <div class="section">
+    <div class="sec-title">Informasi Produksi</div>
+    {% if batch.production_date %}
+    <div class="row">
+      <span class="row-label">🏭 Tanggal Produksi</span>
+      <span class="row-val">{{ batch.production_date.strftime('%d %B %Y') }}</span>
+    </div>
+    {% endif %}
+    {% if batch.expiry_date %}
+    <div class="row">
+      <span class="row-label">📅 Kadaluarsa</span>
+      <span class="row-val" style="color:{% if batch.expiry_date < today %}#FF5050{% else %}var(--accent){% endif %}">
+        {{ batch.expiry_date.strftime('%d %B %Y') }}
+      </span>
+    </div>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  <!-- Custom fields -->
+  {% if product.fields_schema %}
+  <div class="section">
+    <div class="sec-title">Detail Produk</div>
+    {% for field in product.fields_schema %}
+    {% set val = batch.data.get(field.key, '') %}
+    {% if val %}
+    <div class="row">
+      <span class="row-label">{{ field.label }}</span>
+      <span class="row-val">{{ val }}</span>
+    </div>
+    {% endif %}
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- Description -->
+  {% if product.description %}
+  <div class="section">
+    <div class="sec-title">Tentang Produk</div>
+    <p class="desc-text">{{ product.description }}</p>
+  </div>
+  {% endif %}
+
+  <!-- Scan counter -->
+  <div class="scan-count">
+    <span class="scan-num">{{ batch.total_scans }}</span>
+    <span>konsumen sudah scan produk ini</span>
+  </div>
+</div>
+
+<!-- Footer -->
+<div class="footer-brand">
+  Transparansi produk dipersembahkan oleh<br>
+  <span>ScanTrac</span> · <a href="/">Platform QR UMKM Indonesia</a>
+</div>
+
+</body>
+</html>

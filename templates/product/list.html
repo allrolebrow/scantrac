@@ -1,0 +1,67 @@
+{% extends "app_base.html" %}
+{% block title %}Produk{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="section-title">Produk Kamu</div>
+    <p class="muted" style="font-size:14px">Kelola semua produk & batch QR Code</p>
+  </div>
+  <a href="{{ url_for('product.new_product') }}" class="btn btn-primary">+ Produk Baru</a>
+</div>
+
+{% if products %}
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:20px">
+  {% for p in products %}
+  <div class="card" style="padding:24px;transition:border-color .2s" 
+       onmouseover="this.style.borderColor='rgba(0,229,160,.2)'" 
+       onmouseout="this.style.borderColor='var(--border)'">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px">
+      <div>
+        <div style="font-family:'Syne',sans-serif;font-size:17px;font-weight:700;margin-bottom:6px">{{ p.name }}</div>
+        {% if p.category %}
+        <span class="badge badge-purple">{{ p.category }}</span>
+        {% endif %}
+      </div>
+      <div style="font-size:11px;color:var(--muted);text-align:right">
+        {{ p.batches | length }} batch<br>
+        <span style="color:var(--accent)">{{ p.batches | sum(attribute='total_scans') }} scan</span>
+      </div>
+    </div>
+    {% if p.description %}
+    <p class="muted" style="font-size:13px;margin-bottom:16px;line-height:1.6">
+      {{ p.description[:100] }}{% if p.description|length > 100 %}...{% endif %}
+    </p>
+    {% endif %}
+    {% if p.fields_schema %}
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px">
+      {% for f in p.fields_schema[:4] %}
+      <span style="background:var(--surface);border:1px solid var(--border);border-radius:6px;
+        padding:3px 10px;font-size:11px;color:var(--muted)">{{ f.label }}</span>
+      {% endfor %}
+      {% if p.fields_schema|length > 4 %}
+      <span style="font-size:11px;color:var(--muted);padding:3px 6px">+{{ p.fields_schema|length - 4 }} lagi</span>
+      {% endif %}
+    </div>
+    {% endif %}
+    <div style="display:flex;gap:8px;border-top:1px solid var(--border);padding-top:16px">
+      <a href="{{ url_for('qr.new_batch', product_id=p.id) }}" class="btn btn-primary" style="flex:1;justify-content:center;padding:9px">⚡ Buat QR</a>
+      <a href="{{ url_for('product.edit_product', product_id=p.id) }}" class="btn btn-ghost" style="padding:9px 14px">✏️</a>
+      <form method="POST" action="{{ url_for('product.delete_product', product_id=p.id) }}" 
+            onsubmit="return confirm('Hapus produk {{ p.name }}? Semua batch & QR akan ikut terhapus.')">
+        <button type="submit" class="btn btn-danger" style="padding:9px 14px">🗑️</button>
+      </form>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="card" style="text-align:center;padding:80px">
+  <div style="font-size:56px;margin-bottom:16px">📦</div>
+  <div style="font-size:20px;font-weight:700;margin-bottom:8px">Belum ada produk</div>
+  <p class="muted" style="margin-bottom:28px;max-width:360px;margin-left:auto;margin-right:auto">
+    Tambahkan produk pertamamu dan mulai generate QR Code untuk transparansi ke konsumen.
+  </p>
+  <a href="{{ url_for('product.new_product') }}" class="btn btn-primary" style="padding:13px 32px">+ Tambah Produk Pertama</a>
+</div>
+{% endif %}
+{% endblock %}

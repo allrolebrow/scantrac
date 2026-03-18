@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Login{% endblock %}
+{% block body %}
+<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:40px;">
+  <div style="width:100%;max-width:420px">
+    <div style="text-align:center;margin-bottom:40px">
+      <div style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;margin-bottom:8px">
+        Scan<span style="color:var(--accent)">Trac</span>
+      </div>
+      <p class="muted" style="font-size:15px">Masuk ke akun UMKM-mu</p>
+    </div>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for cat, msg in messages %}
+        <div class="alert alert-{{ cat }}">{{ msg }}</div>
+      {% endfor %}
+    {% endwith %}
+    <div class="card">
+      <form method="POST" action="{{ url_for('auth.login') }}">
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input type="email" name="email" class="form-input" placeholder="kamu@email.com" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" name="password" class="form-input" placeholder="••••••••" required>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;padding:13px;margin-top:8px">
+          Masuk →
+        </button>
+      </form>
+    </div>
+    <p style="text-align:center;margin-top:20px;font-size:14px;color:var(--muted)">
+      Belum punya akun? <a href="{{ url_for('auth.register') }}" style="color:var(--accent)">Daftar gratis</a>
+    </p>
+  </div>
+</div>
+{% endblock %}

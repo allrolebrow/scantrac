@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block body %}
+<div class="app-layout">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">Scan<span>Trac</span></div>
+    <nav class="sidebar-nav">
+      <a href="{{ url_for('dashboard.index') }}" class="nav-item {% if request.endpoint == 'dashboard.index' %}active{% endif %}">
+        <span class="nav-icon">📊</span> Dashboard
+      </a>
+      <a href="{{ url_for('product.list_products') }}" class="nav-item {% if 'product' in request.endpoint %}active{% endif %}">
+        <span class="nav-icon">📦</span> Produk
+      </a>
+      <a href="{{ url_for('qr.new_batch', product_id=0) if false else '#' }}" class="nav-item {% if 'qr' in request.endpoint %}active{% endif %}">
+        <span class="nav-icon">⚡</span> QR Codes
+      </a>
+      <div style="flex:1"></div>
+      <a href="{{ url_for('auth.logout') }}" class="nav-item" style="margin-top:auto">
+        <span class="nav-icon">🚪</span> Logout
+      </a>
+    </nav>
+    <div style="padding:16px 24px;border-top:1px solid var(--border);font-size:12px;color:var(--muted)">
+      {{ current_user.name }}<br>
+      <span class="badge badge-green">{{ current_user.plan | upper }}</span>
+    </div>
+  </aside>
+  <!-- Main -->
+  <main class="main-content">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for cat, msg in messages %}
+        <div class="alert alert-{{ 'success' if cat == 'success' else 'error' if cat == 'error' else 'info' }}">{{ msg }}</div>
+      {% endfor %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </main>
+</div>
+{% endblock %}

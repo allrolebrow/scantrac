@@ -1,0 +1,69 @@
+{% extends "app_base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="section-title">Halo, {{ current_user.name.split()[0] }} 👋</div>
+    <p class="muted" style="font-size:14px">Ringkasan aktivitas produk UMKM kamu</p>
+  </div>
+  <a href="{{ url_for('product.new_product') }}" class="btn btn-primary">+ Produk Baru</a>
+</div>
+
+<!-- Stats -->
+<div class="stat-grid">
+  <div class="stat-card">
+    <div class="stat-num" style="color:var(--accent)">{{ products | length }}</div>
+    <div class="stat-label">Total Produk</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-num">{{ total_batches }}</div>
+    <div class="stat-label">Total Batch / QR Code</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-num" style="color:var(--accent2)">{{ total_scans }}</div>
+    <div class="stat-label">Total Scan Konsumen</div>
+  </div>
+</div>
+
+<!-- Products Table -->
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+  <div class="section-title" style="font-size:20px">Produk Kamu</div>
+  <a href="{{ url_for('product.list_products') }}" style="font-size:13px;color:var(--muted)">Lihat semua →</a>
+</div>
+
+{% if products %}
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>Nama Produk</th>
+        <th>Kategori</th>
+        <th>Batch</th>
+        <th>Dibuat</th>
+        <th>Aksi</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in products[:5] %}
+      <tr>
+        <td style="font-weight:600">{{ p.name }}</td>
+        <td><span class="badge badge-purple">{{ p.category or '-' }}</span></td>
+        <td>{{ p.batches | length }}</td>
+        <td class="muted" style="font-size:13px">{{ p.created_at.strftime('%d %b %Y') }}</td>
+        <td>
+          <a href="{{ url_for('qr.new_batch', product_id=p.id) }}" class="btn btn-ghost" style="padding:6px 14px;font-size:12px">+ QR Baru</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="card" style="text-align:center;padding:60px">
+  <div style="font-size:48px;margin-bottom:16px">📦</div>
+  <div style="font-size:18px;font-weight:600;margin-bottom:8px">Belum ada produk</div>
+  <p class="muted" style="margin-bottom:24px">Mulai dengan tambahkan produk pertama kamu</p>
+  <a href="{{ url_for('product.new_product') }}" class="btn btn-primary">+ Tambah Produk</a>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,107 @@
+{% extends "app_base.html" %}
+{% block title %}Edit Produk{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="section-title">Edit Produk</div>
+    <p class="muted" style="font-size:14px">{{ product.name }}</p>
+  </div>
+  <a href="{{ url_for('product.list_products') }}" class="btn btn-ghost">← Kembali</a>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 380px;gap:24px">
+  <div class="card">
+    <form method="POST" id="editForm">
+      <div class="form-group">
+        <label class="form-label">Nama Produk *</label>
+        <input type="text" name="name" class="form-input" value="{{ product.name }}" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Kategori</label>
+        <select name="category" class="form-input">
+          <option value="">-- Pilih Kategori --</option>
+          {% for cat in categories %}
+          <option value="{{ cat }}" {% if product.category == cat %}selected{% endif %}>{{ cat }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Deskripsi</label>
+        <textarea name="description" class="form-input">{{ product.description or '' }}</textarea>
+      </div>
+
+      <div style="border-top:1px solid var(--border);padding-top:24px;margin-top:8px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+          <div style="font-weight:700">Field Kustom</div>
+          <button type="button" class="btn btn-ghost" style="padding:8px 16px;font-size:13px" onclick="addField()">+ Field</button>
+        </div>
+        <div id="fieldsContainer" style="display:flex;flex-direction:column;gap:12px"></div>
+      </div>
+      <input type="hidden" name="custom_fields" id="customFieldsInput">
+      <button type="submit" class="btn btn-primary" style="margin-top:24px;width:100%;justify-content:center;padding:13px" onclick="submitForm()">
+        Simpan Perubahan →
+      </button>
+    </form>
+  </div>
+
+  <div class="card">
+    <div style="font-weight:700;margin-bottom:4px">Field Populer</div>
+    <p class="muted" style="font-size:13px;margin-bottom:16px">Klik untuk tambahkan</p>
+    <div style="display:flex;flex-direction:column;gap:8px" id="presets"></div>
+  </div>
+</div>
+
+<script>
+const PRESETS = [
+  {label:"Bahan-bahan",key:"bahan",type:"textarea"},
+  {label:"Tanggal Produksi",key:"tgl_produksi",type:"date"},
+  {label:"Tanggal Kadaluarsa",key:"kadaluarsa",type:"date"},
+  {label:"Berat Bersih",key:"berat",type:"text"},
+  {label:"Informasi Nutrisi",key:"nutrisi",type:"textarea"},
+  {label:"Sertifikasi Halal",key:"halal",type:"text"},
+  {label:"Roast Level",key:"roast",type:"text"},
+  {label:"Kadar Gula",key:"gula",type:"text"},
+  {label:"Kalori",key:"kalori",type:"text"},
+  {label:"No. BPOM",key:"bpom",type:"text"},
+  {label:"Asal Bahan",key:"asal",type:"text"},
+  {label:"Cara Penyimpanan",key:"penyimpanan",type:"textarea"},
+];
+
+let fields = {{ product.fields_schema | tojson }};
+
+function renderPresets(){
+  document.getElementById('presets').innerHTML = PRESETS.map(p=>`
+    <button type="button" onclick='addPreset(${JSON.stringify(p)})'
+      style="text-align:left;background:var(--surface);border:1px solid var(--border);border-radius:10px;
+      padding:10px 14px;color:var(--text);font-size:13px;cursor:pointer;width:100%"
+      onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+      + ${p.label}</button>`).join('');
+}
+function addPreset(p){ if(!fields.find(f=>f.key===p.key)){fields.push(p);renderFields();} }
+function addField(){ fields.push({label:'',key:'custom_'+Date.now(),type:'text',custom:true});renderFields(); }
+function removeField(key){ fields=fields.filter(f=>f.key!==key);renderFields(); }
+function renderFields(){
+  const c=document.getElementById('fieldsContainer');
+  if(!fields.length){c.innerHTML='<p class="muted" style="font-size:13px;padding:12px 0">Belum ada field kustom.</p>';return;}
+  c.innerHTML=fields.map((f,i)=>`
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;display:grid;grid-template-columns:1fr auto auto;gap:12px;align-items:center">
+      <div>
+        <input type="text" placeholder="Nama field" value="${f.label}" oninput="fields[${i}].label=this.value"
+          style="background:transparent;border:none;color:var(--text);font-size:14px;font-weight:600;width:100%;outline:none">
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">key: ${f.key}</div>
+      </div>
+      <select onchange="fields[${i}].type=this.value"
+        style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:6px 10px;color:var(--text);font-size:12px">
+        <option value="text" ${f.type==='text'?'selected':''}>Teks</option>
+        <option value="textarea" ${f.type==='textarea'?'selected':''}>Paragraf</option>
+        <option value="date" ${f.type==='date'?'selected':''}>Tanggal</option>
+        <option value="number" ${f.type==='number'?'selected':''}>Angka</option>
+      </select>
+      <button type="button" onclick="removeField('${f.key}')"
+        style="background:rgba(255,80,80,.1);border:1px solid rgba(255,80,80,.2);border-radius:8px;padding:6px 10px;color:#FF5050;cursor:pointer">✕</button>
+    </div>`).join('');
+}
+function submitForm(){ document.getElementById('customFieldsInput').value=JSON.stringify(fields); }
+renderPresets(); renderFields();
+</script>
+{% endblock %}

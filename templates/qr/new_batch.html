@@ -1,0 +1,73 @@
+{% extends "app_base.html" %}
+{% block title %}Buat QR Batch{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="section-title">Generate QR Code Baru</div>
+    <p class="muted" style="font-size:14px">Produk: <strong>{{ product.name }}</strong></p>
+  </div>
+  <a href="{{ url_for('product.list_products') }}" class="btn btn-ghost">← Kembali</a>
+</div>
+
+<div style="max-width:640px">
+  <div class="card">
+    <form method="POST">
+      <div class="form-group">
+        <label class="form-label">Kode Batch *</label>
+        <input type="text" name="batch_code" class="form-input" 
+          placeholder="contoh: GAY-2025-031" required
+          value="{{ product.category[:3].upper() if product.category else 'PROD' }}-{{ now.year }}-001">
+        <span style="font-size:12px;color:var(--muted)">Kode unik untuk mengidentifikasi batch produksi ini</span>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div class="form-group">
+          <label class="form-label">Tanggal Produksi</label>
+          <input type="date" name="production_date" class="form-input">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tanggal Kadaluarsa</label>
+          <input type="date" name="expiry_date" class="form-input">
+        </div>
+      </div>
+
+      {% if product.fields_schema %}
+      <div style="border-top:1px solid var(--border);padding-top:24px;margin-top:8px;margin-bottom:8px">
+        <div style="font-weight:700;margin-bottom:4px">Data Produk</div>
+        <p class="muted" style="font-size:13px;margin-bottom:20px">Isi informasi untuk batch ini</p>
+        {% for field in product.fields_schema %}
+        <div class="form-group">
+          <label class="form-label">{{ field.label }}</label>
+          {% if field.type == 'textarea' %}
+          <textarea name="field_{{ field.key }}" class="form-input" placeholder="{{ field.label }}..."></textarea>
+          {% elif field.type == 'date' %}
+          <input type="date" name="field_{{ field.key }}" class="form-input">
+          {% elif field.type == 'number' %}
+          <input type="number" name="field_{{ field.key }}" class="form-input" placeholder="0">
+          {% else %}
+          <input type="text" name="field_{{ field.key }}" class="form-input" placeholder="{{ field.label }}...">
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div style="background:rgba(123,97,255,.06);border:1px solid rgba(123,97,255,.15);border-radius:12px;
+        padding:16px;margin-bottom:20px;font-size:13px;color:var(--muted)">
+        💡 Produk ini belum punya field kustom. 
+        <a href="{{ url_for('product.edit_product', product_id=product.id) }}">Tambahkan field</a> untuk tampilkan lebih banyak info ke konsumen.
+      </div>
+      {% endif %}
+
+      <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;padding:14px;font-size:15px">
+        ⚡ Generate QR Code
+      </button>
+    </form>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+// Auto-set today for production_date
+document.querySelector('input[name="production_date"]').valueAsDate = new Date();
+</script>
+{% endblock %}
