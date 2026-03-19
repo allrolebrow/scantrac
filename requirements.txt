@@ -8,4 +8,4 @@ pymysql==1.1.1
 python-dotenv==1.0.1
 qrcode[pil]==7.4.2
 pillow==10.4.0
-gunicorn==21.2.0
+cryptography==42.0.5
