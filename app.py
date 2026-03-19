@@ -96,4 +96,8 @@ def create_app():
     def not_found(e):
         return "Halaman tidak ditemukan!", 404
 
+    # 🔥 AUTO CREATE TABLE (PENTING BANGET)
+    with app.app_context():
+        db.create_all()
+
     return app
